@@ -26,7 +26,6 @@ type Classes struct {
 }
 
 var db *sql.DB
-var cmap map[int]Classes
 var c Classes
 
 //for html
@@ -118,37 +117,7 @@ func allClasses(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func updateClass(w http.ResponseWriter, r *http.Request) {
-	//open db
-	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/classes_db")
-	if err != nil {
-		panic(err.Error())
-	}
-	//defer the db from closing
-	defer db.Close()
-	fmt.Println("update has been triggered")
-	params := mux.Vars(r)
-	mod := params["modulecode"]
-	sid := params["classcode"]
-	id, _ := strconv.Atoi(sid)
-	cdate := params["classdate"]
-	cstart := params["classstart"]
-	cend := params["classend"]
-	scap := params["classcap"]
-	cap, _ := strconv.Atoi(scap)
-	srating := params["classrating"]
-	rating, _ := strconv.ParseFloat(srating, 64)
-	info := params["classinfo"]
-	tname := params["tutorname"]
-	fmt.Println(mod, id, cdate, cstart, cend, cap, srating, info, tname)
-	//query to create classes
-	query := fmt.Sprintf("UPDATE Classes SET ModuleCode='%s',ClassDate='%s',ClassStart='%s',ClassEnd='%s',ClassCap=%d,ClassInfo='%s',ClassRating=%f,TutorName='%s' WHERE ClassCode=%d", mod, cdate, cstart, cend, cap, info, rating, tname, id)
-	_, err = db.Query(query)
-	//check for error in the query
-	if err != nil {
-		panic(err.Error())
-	}
-}
+
 
 func deleteClass(w http.ResponseWriter, r *http.Request) {
 	//open db
@@ -174,7 +143,49 @@ func deleteClass(w http.ResponseWriter, r *http.Request) {
 
 	//fmt.Fprintf(w, "Class with ClassCode = %s was deleted", params["classcode"])
 }*/
-func updateClass(w http.ResponseWriter, r *http.Request) {}
+func updateClassDB(db *sql.DB, cid int, c Classes) {
+	query := fmt.Sprintf("UPDATE Classes SET ModuleID='%s',ClassDate='%s',ClassStart='%s',ClassEnd='%s',ClassCap=%d,TutorName='%s' WHERE ClassID=%d", c.ModuleID, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorName, cid)
+	_, err := db.Query(query)
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+		panic(err.Error())
+	}
+	fmt.Println("Successfully updated the DB")
+}
+
+func updateClass(w http.ResponseWriter, r *http.Request) {
+	if !validKey(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("401 - Invalid key"))
+		return
+	}
+	params := mux.Vars(r)
+	var cid int
+	fmt.Sscan(params["classid"], &cid)
+
+	if r.Header.Get("Content-type") == "application/json" {
+		reqBody, err := ioutil.ReadAll(r.Body)
+
+		if err == nil { // If no error
+			var c Classes
+			// Map json to variable Classes c
+			json.Unmarshal([]byte(reqBody), &c)
+
+			// Check if all non-null information exist
+			if c.ClassID == 0 || c.ModuleID == "" || c.ClassDate == "" || c.ClassStart == "" || c.ClassEnd == "" || c.ClassCap == 0 || c.TutorName == "" {
+				w.WriteHeader(http.StatusUnprocessableEntity)
+				w.Write([]byte("422 - Please supply all neccessary information to update existing class "))
+			} else {
+				updateClassDB(db, cid, c)
+				w.WriteHeader(http.StatusCreated)
+				w.Write([]byte("201 - Class created."))
+			}
+		} else { //Incorrect format
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte("422 - Please supply class information in JSON format"))
+		}
+	}
+}
 func deleteClass(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -207,12 +218,3 @@ func main() {
 		httpPort = "9101"
 	}
 }
-
-/*
-	httpPort := os.Getenv("HTTP_PORT")
-	if httpPort == "" {
-		httpPort = "9100"
-	}
-
-	e.Logger.Fatal(e.Start(":" + httpPort))
-}*/

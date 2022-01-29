@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -28,7 +29,7 @@ const key = "2c78afaf-97da-4816-bbee-9ad239abb296"
 
 func CreateClass(c Classes) string {
 	// Set up url
-	url := classURL + "?key=" + key
+	url := classURL + "?key=" + key ///to call. will use to call the apis from other people.
 	// Convert to Json
 	jsonValue, _ := json.Marshal(c)
 
@@ -53,6 +54,35 @@ func CreateClass(c Classes) string {
 
 	response.Body.Close()
 
+	return errMsg
+}
+
+func updateClass(ClassID int, c Classes) string {
+	// Set up url
+	url := classURL + "/" + strconv.Itoa(ClassID) + "?key=" + key ///to call. will use to call the apis from other people.
+	// Convert to Json
+	jsonValue, _ := json.Marshal(c)
+
+	// Post with object
+	request, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(jsonValue))
+	request.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	response, err := client.Do(request)
+	var errMsg string
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+		// Get fail or success msg
+		if response.StatusCode == 401 {
+			errMsg = string(data)
+		} else if response.StatusCode == 422 {
+			errMsg = string(data)
+		} else {
+			errMsg = "Success"
+		}
+	}
+	response.Body.Close()
 	return errMsg
 }
 
@@ -118,9 +148,42 @@ func newClassesMenu() Classes {
 	}
 	return c
 }
-func updateClassesMenu() {
+func updateClassesMenu() Classes {
+	var c Classes
 
+	fmt.Println("UPDATING CLASS")
+	fmt.Println("Please fill in the following details (b to back).")
+	fmt.Println("Class Code: ")
+	fmt.Scanln(&c.ClassID)
+	if c.ClassID == 0 {
+		return c
+	}
+	fmt.Println("Class Day: ")
+	fmt.Scanln(&c.ClassDate)
+	if c.ClassDate == "b" {
+		return c
+	}
+	fmt.Println("Class Start Time (in HH:MM:SS format): ")
+	fmt.Scanln(&c.ClassStart)
+	if c.ClassStart == "b" {
+		return c
+	}
+	fmt.Println("Class End Time (in HH:MM:SS format): ")
+	fmt.Scanln(&c.ClassEnd)
+	fmt.Println("Class Capacity: ")
+	fmt.Scanln(&c.ClassCap)
+	fmt.Println("Your Name: ")
+	fmt.Scanln(&c.TutorName)
+	fmt.Println("--------------------")
+	// Call api caller to create a new passenger object
+	errMsg := updateClass(c.ClassID, c)
+	fmt.Println(errMsg)
+	if errMsg != "Success" {
+		fmt.Println(errMsg)
+	}
+	return c
 }
+
 func main() {
 	//var c Classes
 
