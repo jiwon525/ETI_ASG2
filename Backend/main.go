@@ -170,7 +170,6 @@ func updateClass(w http.ResponseWriter, r *http.Request) {
 			var c Classes
 			// Map json to variable Classes c
 			json.Unmarshal([]byte(reqBody), &c)
-
 			// Check if all non-null information exist
 			if c.ClassID == 0 || c.ModuleID == "" || c.ClassDate == "" || c.ClassStart == "" || c.ClassEnd == "" || c.ClassCap == 0 || c.TutorName == "" {
 				w.WriteHeader(http.StatusUnprocessableEntity)
@@ -186,7 +185,32 @@ func updateClass(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+func deleteClassDB(db *sql.DB, cid int) string {
+	query := fmt.Sprintf("DELETE FROM Classes WHERE ClassID=%d", cid)
+	_, err := db.Query(query)
+	errMsg := "Success"
+	if err != nil {
+		errMsg = "Class does not exist"
+	}
+	fmt.Println("Successfully deleted item from DB")
+	return errMsg
+}
 func deleteClass(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "DELETE" {
+		params := mux.Vars(r)
+		var cid int
+		fmt.Sscan(params["classid"], &cid)
+		errMsg := deleteClassDB(db, cid)
+		if errMsg == "Success" {
+			w.WriteHeader(http.StatusAccepted)
+			w.Write([]byte("202 - Course deleted: " +
+				params["courseid"]))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("404 - No class found"))
+		}
+
+	}
 
 }
 func classInfo(w http.ResponseWriter, r *http.Request) {

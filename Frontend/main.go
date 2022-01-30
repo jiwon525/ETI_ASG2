@@ -62,8 +62,7 @@ func updateClass(ClassID int, c Classes) string {
 	url := classURL + "/" + strconv.Itoa(ClassID) + "?key=" + key ///to call. will use to call the apis from other people.
 	// Convert to Json
 	jsonValue, _ := json.Marshal(c)
-
-	// Post with object
+	//putting new data
 	request, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(jsonValue))
 	request.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
@@ -85,8 +84,37 @@ func updateClass(ClassID int, c Classes) string {
 	response.Body.Close()
 	return errMsg
 }
+func deleteClass(ClassID int) string {
+	//set up url
+	url := classURL + "/" + strconv.Itoa(ClassID) + "?key" + key
+	// Request (DELETE "http://localhost:9101/api/v1/class/x?key/<key value>")
 
-func Menu() {
+	// Create request
+	request, err := http.NewRequest("DELETE", url, nil)
+	// Create client
+	client := &http.Client{}
+	response, err := client.Do(request)
+	var errMsg string
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+	} else {
+		// Fetch Request
+		data, _ := ioutil.ReadAll(response.Body)
+		// Get fail or success msg
+		if response.StatusCode == 401 {
+			errMsg = string(data)
+		} else if response.StatusCode == 422 {
+			errMsg = string(data)
+		} else {
+			errMsg = "Success"
+		}
+	}
+	response.Body.Close()
+
+	return errMsg
+}
+
+func Menu(exit bool) bool {
 
 	var option string
 
@@ -105,33 +133,34 @@ func Menu() {
 	switch option {
 	case "1":
 		newClassesMenu()
+		exit = false
 	case "2":
 		updateClassesMenu()
+		exit = false
+	case "3":
+		deleteClassesMenu()
+		exit = false
 	case "0":
+		exit = true
+		return exit
 
 	default:
+		exit = true
+		return exit
 	}
+	return exit
 }
-func newClassesMenu() Classes {
+func newClassesMenu() {
 	var c Classes
 
 	fmt.Println("CREATING NEW CLASS")
-	fmt.Println("Please fill in the following details (b to back).")
+	fmt.Println("Please fill in the following details.")
 	fmt.Println("Module Code: ")
 	fmt.Scanln(&c.ModuleID)
-	if c.ModuleID == "b" {
-		return c
-	}
 	fmt.Println("Class Day: ")
 	fmt.Scanln(&c.ClassDate)
-	if c.ClassDate == "b" {
-		return c
-	}
 	fmt.Println("Class Start Time (in HH:MM:SS format): ")
 	fmt.Scanln(&c.ClassStart)
-	if c.ClassStart == "b" {
-		return c
-	}
 	fmt.Println("Class End Time (in HH:MM:SS format): ")
 	fmt.Scanln(&c.ClassEnd)
 	fmt.Println("Class Capacity: ")
@@ -146,28 +175,20 @@ func newClassesMenu() Classes {
 	if errMsg != "Success" {
 		fmt.Println(errMsg)
 	}
-	return c
 }
-func updateClassesMenu() Classes {
+func updateClassesMenu() {
 	var c Classes
 
 	fmt.Println("UPDATING CLASS")
-	fmt.Println("Please fill in the following details (b to back).")
+	fmt.Println("Please fill in the following details.")
 	fmt.Println("Class Code: ")
 	fmt.Scanln(&c.ClassID)
-	if c.ClassID == 0 {
-		return c
-	}
+	fmt.Println("Module Code: ")
+	fmt.Scanln(&c.ModuleID)
 	fmt.Println("Class Day: ")
 	fmt.Scanln(&c.ClassDate)
-	if c.ClassDate == "b" {
-		return c
-	}
 	fmt.Println("Class Start Time (in HH:MM:SS format): ")
 	fmt.Scanln(&c.ClassStart)
-	if c.ClassStart == "b" {
-		return c
-	}
 	fmt.Println("Class End Time (in HH:MM:SS format): ")
 	fmt.Scanln(&c.ClassEnd)
 	fmt.Println("Class Capacity: ")
@@ -181,14 +202,25 @@ func updateClassesMenu() Classes {
 	if errMsg != "Success" {
 		fmt.Println(errMsg)
 	}
-	return c
+}
+func deleteClassesMenu() {
+	var c Classes
+	fmt.Println("DELETING CLASS")
+	fmt.Println("Please fill in the following details.")
+	fmt.Println("Class Code: ")
+	fmt.Scanln(&c.ClassID)
+	fmt.Println("--------------------")
+	errMsg := deleteClass(c.ClassID)
+	if errMsg != "Success" {
+		fmt.Println(errMsg)
+	}
 }
 
 func main() {
 	//var c Classes
-
+	exit := false
 	// While not exit
-	for {
-		Menu()
+	for exit == false {
+		Menu(exit)
 	}
 }
