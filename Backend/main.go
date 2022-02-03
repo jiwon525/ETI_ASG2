@@ -30,8 +30,6 @@ var c Classes
 
 //for html
 
-type Class []Classes
-
 const classURL = "http://localhost:9101/api/v1/class"
 const key = "2c78afaf-97da-4816-bbee-9ad239abb296"
 
@@ -48,6 +46,8 @@ func validKey(r *http.Request) bool {
 		return false
 	}
 }
+
+//function to insert new classes in the db
 func createClassDB(db *sql.DB, c Classes) {
 
 	//PassengerID is auto incremented
@@ -61,6 +61,7 @@ func createClassDB(db *sql.DB, c Classes) {
 	fmt.Println("Successfully added into the DB")
 }
 
+//api to create new class and call the createClassDB function
 func createClass(w http.ResponseWriter, r *http.Request) {
 	// Valid key for API check
 	if !validKey(r) {
@@ -94,55 +95,7 @@ func createClass(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-func allClasses(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/classes_db")
-	results, err := db.Query("SELECT * FROM classes_db.Classes")
-	if err != nil {
-		panic(err.Error())
-	}
-	defer results.Close()
-	var pc []Classes
-	for results.Next() {
-		// map this type to the record in the table
-		var c Classes
-		err = results.Scan(&c.ModuleCode, &c.ClassCode, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.ClassInfo, &c.ClassRating, &c.TutorName)
-		if err != nil {
-			panic(err.Error())
-		}
-
-		pc = append(pc, c)
-		fmt.Println(pc)
-		json.NewEncoder(w).Encode(pc)
-	}
-
-}
-
-
-func deleteClass(w http.ResponseWriter, r *http.Request) {
-	//open db
-	db, err := sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/classes_db")
-	if err != nil {
-		panic(err.Error())
-	}
-	//defer the db from closing
-	defer db.Close()
-	fmt.Println("delete has been triggered")
-	//store the content of the request.
-	params := mux.Vars(r)
-	id := params["classcode"]
-	//fmt.Println(id)
-	//intid, _ := strconv.Atoi(id)
-	//query to delete classes
-	query := fmt.Sprintf("DELETE FROM Classes WHERE ClassCode=" + id)
-	_, err = db.Query(query)
-	//check for error in the query
-	if err != nil {
-		panic(err.Error())
-	}
-
-	//fmt.Fprintf(w, "Class with ClassCode = %s was deleted", params["classcode"])
-}*/
+//function to update class details in the db
 func updateClassDB(db *sql.DB, cid int, c Classes) {
 	query := fmt.Sprintf("UPDATE Classes SET ModuleID='%s',ClassDate='%s',ClassStart='%s',ClassEnd='%s',ClassCap=%d,TutorName='%s' WHERE ClassID=%d", c.ModuleID, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorName, cid)
 	_, err := db.Query(query)
@@ -153,6 +106,7 @@ func updateClassDB(db *sql.DB, cid int, c Classes) {
 	fmt.Println("Successfully updated the DB")
 }
 
+//api to update class details and call the updateClassDB
 func updateClass(w http.ResponseWriter, r *http.Request) {
 	if !validKey(r) {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -177,7 +131,7 @@ func updateClass(w http.ResponseWriter, r *http.Request) {
 			} else {
 				updateClassDB(db, cid, c)
 				w.WriteHeader(http.StatusCreated)
-				w.Write([]byte("201 - Class created."))
+				w.Write([]byte("204 - Resource updated successfully"))
 			}
 		} else { //Incorrect format
 			w.WriteHeader(http.StatusUnprocessableEntity)
@@ -185,6 +139,8 @@ func updateClass(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+//function to delete class from the database
 func deleteClassDB(db *sql.DB, cid int) string {
 	query := fmt.Sprintf("DELETE FROM Classes WHERE ClassID=%d", cid)
 	_, err := db.Query(query)
@@ -195,6 +151,8 @@ func deleteClassDB(db *sql.DB, cid int) string {
 	fmt.Println("Successfully deleted item from DB")
 	return errMsg
 }
+
+//api to delete classes
 func deleteClass(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "DELETE" {
 		params := mux.Vars(r)
@@ -213,12 +171,49 @@ func deleteClass(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+//function to connect with database to print it out
+func getclassDB(db *sql.DB) ([]Classes, string) {
+	query := fmt.Sprintf("SELECT * FROM classes_db.classes")
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	var errMsg string
+	var cc []Classes
+	for results.Next() {
+		var c Classes
+		err = results.Scan(&c.ClassID, &c.ModuleID, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorName)
+		if err != nil {
+			errMsg = "Classes do not exist"
+		}
+		cc = append(cc, c)
+		//fmt.Println(cc)
+	}
+	return cc, errMsg
+}
+
+//api to print all classes
+func allClasses(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		c, errMsg := getclassDB(db)
+		//fmt.Println(c)
+		switch errMsg {
+		case "Classes do not exist":
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("404 - No class found"))
+		default:
+			json.NewEncoder(w).Encode(c)
+		}
+
+	}
+
+}
+func searchClass(w http.ResponseWriter, r *http.Request)   {}
+func classStudents(w http.ResponseWriter, r *http.Request) {}
 func classInfo(w http.ResponseWriter, r *http.Request) {
 
 }
-func allClasses(w http.ResponseWriter, r *http.Request)    {}
-func searchClass(w http.ResponseWriter, r *http.Request)   {}
-func classStudents(w http.ResponseWriter, r *http.Request) {}
 func main() {
 	var err error
 	db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/classes_db")
@@ -229,6 +224,7 @@ func main() {
 	}
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v1/class", createClass).Methods("POST")
+	//router.HandleFunc("/api/v1/class/{tutorid}",tutorsearch).Methods("GET")
 	router.HandleFunc("/api/v1/class/{classid}", updateClass).Methods("PUT")
 	router.HandleFunc("/api/v1/class/{classid}", deleteClass).Methods("DELETE")
 	router.HandleFunc("/api/v1/class/{classid}", classInfo).Methods("GET")                                       //to view class info and ratings
