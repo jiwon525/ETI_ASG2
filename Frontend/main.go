@@ -27,6 +27,11 @@ type Classes struct {
 const classURL = "http://localhost:9101/api/v1/class"
 const key = "2c78afaf-97da-4816-bbee-9ad239abb296"
 
+func printSlice(s []Classes) {
+	for _, el := range s {
+		fmt.Println(el)
+	}
+}
 func CreateClass(c Classes) string {
 	// Set up url
 	url := classURL + "?key=" + key ///to call. will use to call the apis from other people.
@@ -114,42 +119,6 @@ func deleteClass(ClassID int) string {
 	return errMsg
 }
 
-func Menu(exit bool) bool {
-
-	var option string
-
-	// Menu
-	fmt.Println("------ Welcome to Class Management ------")
-	fmt.Println("[1] Create new class")
-	fmt.Println("[2] Update classes")
-	fmt.Println("[3] Delete classes")
-	fmt.Println("[4] Print all classes")
-	fmt.Println("[0] Exit application")
-	fmt.Println("------------------------------")
-	fmt.Println("Enter your option: ")
-	fmt.Scanln(&option)
-
-	// Options
-	switch option {
-	case "1":
-		newClassesMenu()
-		exit = false
-	case "2":
-		updateClassesMenu()
-		exit = false
-	case "3":
-		deleteClassesMenu()
-		exit = false
-	case "0":
-		exit = true
-		return exit
-
-	default:
-		exit = true
-		return exit
-	}
-	return exit
-}
 func newClassesMenu() {
 	var c Classes
 
@@ -215,12 +184,78 @@ func deleteClassesMenu() {
 		fmt.Println(errMsg)
 	}
 }
-
-func main() {
-	//var c Classes
-	exit := false
-	// While not exit
-	for exit == false {
-		Menu(exit)
+func printClasses() (string, []Classes) {
+	//set up url
+	url := classURL + "?key" + key
+	// Create request
+	response, err := http.Get(url)
+	var c []Classes
+	var errMsg string
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+	} else {
+		// Fetch Request
+		data, _ := ioutil.ReadAll(response.Body)
+		// Get fail or success msg
+		if response.StatusCode == 401 {
+			errMsg = string(data)
+		} else if response.StatusCode == 422 {
+			errMsg = string(data)
+		} else {
+			errMsg = "Success"
+			//since this is a get have to unmarshal (convert json to class)
+			json.Unmarshal([]byte(data), &c)
+		}
 	}
+	response.Body.Close()
+
+	return errMsg, c
+}
+func printClassesMenu() {
+	fmt.Println("------ Classes List ------")
+
+	// Call api caller to get history of trips made by passengerID
+	errMsg, c := printClasses()
+
+	if errMsg != "Success" {
+		fmt.Println(errMsg)
+	} else {
+		printSlice(c)
+	}
+	fmt.Println("--------------------------")
+}
+func main() {
+	var option string
+	for {
+		// Menu
+		fmt.Println("------ Welcome to Class Management ------")
+		fmt.Println("[1] Create new class")
+		fmt.Println("[2] Update classes")
+		fmt.Println("[3] Delete classes")
+		fmt.Println("[4] Print all classes")
+		fmt.Println("[0] Exit application")
+		fmt.Println("------------------------------")
+		fmt.Println("Enter your option: ")
+		fmt.Scanln(&option)
+
+		// Options
+		if option == "0" {
+			break
+		}
+		switch option {
+		case "1":
+			newClassesMenu()
+		case "2":
+			updateClassesMenu()
+		case "3":
+			deleteClassesMenu()
+		case "4":
+			printClassesMenu()
+		case "0":
+			break
+
+		default:
+		}
+	}
+
 }
