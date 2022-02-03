@@ -1,5 +1,0 @@
-##functions for now
-delete class:
-curl -X DELETE http://localhost:9101/api/v1/class/7?key=2c78afaf-97da-4816-bbee-9ad239abb296
-create class:
-curl -H "Content-Type:application/json" -X POST http://localhost:9101/api/v1/class?key=2c78afaf-97da-4816-bbee-9ad239abb296

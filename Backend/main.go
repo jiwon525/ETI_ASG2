@@ -18,12 +18,16 @@ type Classes struct {
 	ModuleID   string `json:"moduleid"` //get from 3.4``
 	ClassID    int    `json:"classid" gorm:"primaryKey"`
 	ClassDate  string `json:"classdate"`
-	ClassStart string `json:"start_time"`
-	ClassEnd   string `json:"end_time"`
+	ClassStart string `json:"classstart"`
+	ClassEnd   string `json:"classend"`
 	ClassCap   int    `json:"classcap"`
-	//TutorID    int    `json:tutorid`
-	TutorName string `json:"tutorname"`
+	TutorName  string `json:"tutorname"`
+	/*TutorID    int    `json:"tutorid"`
+	Rating float32
+	ClassInfo string */
 }
+
+//call other peoples api for TutorID TutorName rating classinfo
 
 var db *sql.DB
 var c Classes
@@ -73,7 +77,7 @@ func createClass(w http.ResponseWriter, r *http.Request) {
 		reqBody, err := ioutil.ReadAll(r.Body)
 
 		if err == nil { // If no error
-
+			var c Classes
 			// Map json to variable Classes c
 			json.Unmarshal([]byte(reqBody), &c)
 
@@ -197,19 +201,22 @@ func getclassDB(db *sql.DB) ([]Classes, string) {
 func allClasses(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		c, errMsg := getclassDB(db)
-		//fmt.Println(c)
+
 		switch errMsg {
 		case "Classes do not exist":
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("404 - No class found"))
 		default:
+			//call api
 			json.NewEncoder(w).Encode(c)
 		}
 
 	}
 
 }
-func searchClass(w http.ResponseWriter, r *http.Request)   {}
+func searchClass(w http.ResponseWriter, r *http.Request) {
+
+}
 func classStudents(w http.ResponseWriter, r *http.Request) {}
 func classInfo(w http.ResponseWriter, r *http.Request) {
 
@@ -227,10 +234,10 @@ func main() {
 	//router.HandleFunc("/api/v1/class/{tutorid}",tutorsearch).Methods("GET")
 	router.HandleFunc("/api/v1/class/{classid}", updateClass).Methods("PUT")
 	router.HandleFunc("/api/v1/class/{classid}", deleteClass).Methods("DELETE")
-	router.HandleFunc("/api/v1/class/{classid}", classInfo).Methods("GET")                                       //to view class info and ratings
-	router.HandleFunc("/api/v1/class", allClasses).Methods("GET")                                                //list all classes
-	router.HandleFunc("/api/v1/class?searchKey={searchKey}&filterType={filterType}", searchClass).Methods("GET") //search for classes, filter type to see if filtering by tutor name, class id etc
-	router.HandleFunc("/api/v1/class/{classid}", classStudents).Methods("GET")                                   //to view list of students in a class. updated every hour or smt
+	router.HandleFunc("/api/v1/class/{classid}", classInfo).Methods("GET")               //to view class info and ratings
+	router.HandleFunc("/api/v1/class", allClasses).Methods("GET")                        //list all classes
+	router.HandleFunc("/api/v1/class?searchKey={searchKey}", searchClass).Methods("GET") //search for classes, filter type to see if filtering by tutor name, class id etc
+	router.HandleFunc("/api/v1/class/{classid}", classStudents).Methods("GET")           //to view list of students in a class. updated every hour or smt
 	fmt.Println("driver microservice api operating on port 9101")
 	log.Fatal(http.ListenAndServe(":9101", router))
 	httpPort := os.Getenv("HTTP_PORT")
