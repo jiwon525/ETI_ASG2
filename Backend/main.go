@@ -177,7 +177,7 @@ func deleteClass(w http.ResponseWriter, r *http.Request) {
 }
 
 //function to connect with database to print it out
-func getclassDB(db *sql.DB) ([]Classes, string) {
+func getClassDB(db *sql.DB) ([]Classes, string) {
 	query := fmt.Sprintf("SELECT * FROM classes_db.classes")
 	results, err := db.Query(query)
 	if err != nil {
@@ -199,8 +199,10 @@ func getclassDB(db *sql.DB) ([]Classes, string) {
 
 //api to print all classes
 func allClasses(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("printing all class")
 	if r.Method == "GET" {
-		c, errMsg := getclassDB(db)
+
+		c, errMsg := getClassDB(db)
 
 		switch errMsg {
 		case "Classes do not exist":
@@ -214,12 +216,62 @@ func allClasses(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+func searchClassDB(db *sql.DB, mid string) ([]Classes, string) {
+	query := fmt.Sprintf("SELECT * FROM classes_db.classes WHERE ModuleID='%s'", mid)
+	results, err := db.Query(query)
+	if err != nil {
+		panic(err.Error())
+	}
+	var errMsg string
+	var cc []Classes
+	for results.Next() {
+		var c Classes
+		err = results.Scan(&c.ClassID, &c.ModuleID, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorName)
+		if err != nil {
+			errMsg = "Classes do not exist"
+		}
+		cc = append(cc, c)
+		//fmt.Println(cc)
+	}
+	return cc, errMsg
+}
 func searchClass(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("searchingclass")
+	if r.Method == "GET" {
+		var mid string
+		// Get query string parameters of student ID and semester start date
+		queryString := r.URL.Query()
 
+		fmt.Sscan(queryString["ModuleID"][0], &mid)
+
+		c, errMsg := searchClassDB(db, mid)
+
+		switch errMsg {
+		case "Classes do not exist":
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("404 - No class found"))
+		default:
+			//call api
+			json.NewEncoder(w).Encode(c)
+		}
+
+	}
 }
 func classStudents(w http.ResponseWriter, r *http.Request) {}
-func classInfo(w http.ResponseWriter, r *http.Request) {
 
+// Help function that calls appropriate function in accordance to parameters in the query string
+func GetClassQuery(w http.ResponseWriter, r *http.Request) {
+	// Get query string parameters
+	queryString := r.URL.Query()
+	_, searchclass := queryString["ModuleID"]
+
+	if searchclass {
+		searchClass(w, r)
+		return
+	} else {
+		allClasses(w, r)
+		return
+	}
 }
 func main() {
 	var err error
@@ -231,13 +283,10 @@ func main() {
 	}
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v1/class", createClass).Methods("POST")
-	//router.HandleFunc("/api/v1/class/{tutorid}",tutorsearch).Methods("GET")
 	router.HandleFunc("/api/v1/class/{classid}", updateClass).Methods("PUT")
 	router.HandleFunc("/api/v1/class/{classid}", deleteClass).Methods("DELETE")
-	router.HandleFunc("/api/v1/class/{classid}", classInfo).Methods("GET")               //to view class info and ratings
-	router.HandleFunc("/api/v1/class", allClasses).Methods("GET")                        //list all classes
-	router.HandleFunc("/api/v1/class?searchKey={searchKey}", searchClass).Methods("GET") //search for classes, filter type to see if filtering by tutor name, class id etc
-	router.HandleFunc("/api/v1/class/{classid}", classStudents).Methods("GET")           //to view list of students in a class. updated every hour or smt
+	router.HandleFunc("/api/v1/class/{classid}", searchClass).Methods("GET")
+	router.HandleFunc("/api/v1/class", GetClassQuery).Methods("GET")
 	fmt.Println("driver microservice api operating on port 9101")
 	log.Fatal(http.ListenAndServe(":9101", router))
 	httpPort := os.Getenv("HTTP_PORT")

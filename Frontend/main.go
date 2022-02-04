@@ -174,7 +174,7 @@ func updateClassesMenu() {
 }
 func deleteClassesMenu() {
 	var c Classes
-	fmt.Println("DELETING CLASS")
+	fmt.Println("-------DELETING CLASS------")
 	fmt.Println("Please fill in the following details.")
 	fmt.Println("Class Code: ")
 	fmt.Scanln(&c.ClassID)
@@ -187,6 +187,48 @@ func deleteClassesMenu() {
 func printClasses() (string, []Classes) {
 	//set up url
 	url := classURL + "?key" + key
+	// Create request
+	response, err := http.Get(url)
+	//response.Header.Set("Content-Type", "application/json")
+	var c []Classes
+	var errMsg string
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+	} else {
+		// Fetch Request
+		data, _ := ioutil.ReadAll(response.Body)
+		// Get fail or success msg
+		if response.StatusCode == 401 {
+			errMsg = string(data)
+		} else if response.StatusCode == 422 {
+			errMsg = string(data)
+		} else {
+			errMsg = "Success"
+			//since this is a get have to unmarshal (convert json to class)
+			json.Unmarshal([]byte(data), &c)
+		}
+	}
+	response.Body.Close()
+
+	return errMsg, c
+}
+func printClassesMenu() {
+
+	fmt.Println("------ Classes List ------")
+
+	errMsg, c := printClasses()
+
+	if errMsg != "Success" {
+		fmt.Println(errMsg)
+	} else {
+		printSlice(c)
+	}
+	fmt.Println("--------------------------")
+}
+
+func searchClasses(ModuleID string) (string, []Classes) {
+	//set up url
+	url := "http://localhost:9101/api/v1/class?ModuleID=" + ModuleID + "&key" + key
 	// Create request
 	response, err := http.Get(url)
 	var c []Classes
@@ -211,16 +253,18 @@ func printClasses() (string, []Classes) {
 
 	return errMsg, c
 }
-func printClassesMenu() {
-	fmt.Println("------ Classes List ------")
-
-	// Call api caller to get history of trips made by passengerID
-	errMsg, c := printClasses()
+func searchClassesMenu() {
+	var c Classes
+	fmt.Println("------ Searching for Classes ------")
+	fmt.Println("Please fill in the following details.")
+	fmt.Println("Module ID: ")
+	fmt.Scanln(&c.ModuleID)
+	errMsg, cc := searchClasses(c.ModuleID)
 
 	if errMsg != "Success" {
 		fmt.Println(errMsg)
 	} else {
-		printSlice(c)
+		printSlice(cc)
 	}
 	fmt.Println("--------------------------")
 }
@@ -233,6 +277,7 @@ func main() {
 		fmt.Println("[2] Update classes")
 		fmt.Println("[3] Delete classes")
 		fmt.Println("[4] Print all classes")
+		fmt.Println("[5] Search for classes")
 		fmt.Println("[0] Exit application")
 		fmt.Println("------------------------------")
 		fmt.Println("Enter your option: ")
@@ -251,8 +296,8 @@ func main() {
 			deleteClassesMenu()
 		case "4":
 			printClassesMenu()
-		case "0":
-			break
+		case "5":
+			searchClassesMenu()
 
 		default:
 		}
