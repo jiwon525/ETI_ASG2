@@ -14,14 +14,17 @@ import (
 
 type Classes struct {
 	//first letter must be capitalised.
-	ModuleID   string `json:"moduleid"` //get from 3.4``
-	ClassID    int    `json:"classid" gorm:"primaryKey"`
-	ClassDate  string `json:"classdate"`
-	ClassStart string `json:"start_time"`
-	ClassEnd   string `json:"end_time"`
-	ClassCap   int    `json:"classcap"`
-	//TutorID    int    `json:tutorid`1
-	TutorName string `json:"tutorname"`
+	ClassID    int     `json:"classid"`  // gorm:"primaryKey"
+	ModuleID   string  `json:"moduleid"` //my module ID = module code from package 3.4
+	ClassDate  string  `json:"classdate"`
+	ClassStart string  `json:"classstart"`
+	ClassEnd   string  `json:"classend"`
+	ClassCap   int     `json:"classcap"`
+	TutorFName string  `json:"tutorfname"` //need to edit main.go
+	TutorLName string  `json:"tutorlname"` //need to edit main.go
+	TutorID    int     `json:"tutorid"`    //need to edit main.go
+	Rating     float32 `json:"rating"`     //need to edit main.go, get from 3.9
+	ClassInfo  string  `json:"classinfo"`  //get from 3.4
 }
 
 const classURL = "http://localhost:9101/api/v1/class"
@@ -31,6 +34,7 @@ func printSlice(s []Classes) {
 	for _, el := range s {
 		fmt.Println(el)
 	}
+
 }
 func CreateClass(c Classes) string {
 	// Set up url
@@ -134,8 +138,10 @@ func newClassesMenu() {
 	fmt.Scanln(&c.ClassEnd)
 	fmt.Println("Class Capacity: ")
 	fmt.Scanln(&c.ClassCap)
+	fmt.Println("Your FirstName: ")
+	fmt.Scanln(&c.TutorFName)
 	fmt.Println("Your Name: ")
-	fmt.Scanln(&c.TutorName)
+	fmt.Scanln(&c.TutorFName)
 	fmt.Println("--------------------")
 
 	// Call api caller to create a new passenger object
@@ -162,8 +168,12 @@ func updateClassesMenu() {
 	fmt.Scanln(&c.ClassEnd)
 	fmt.Println("Class Capacity: ")
 	fmt.Scanln(&c.ClassCap)
-	fmt.Println("Your Name: ")
-	fmt.Scanln(&c.TutorName)
+	fmt.Println("Your First Name: ")
+	fmt.Scanln(&c.TutorFName)
+	fmt.Println("Your Last Name: ")
+	fmt.Scanln(&c.TutorLName)
+	fmt.Println("Your ID: ")
+	fmt.Scanln(&c.TutorID)
 	fmt.Println("--------------------")
 	// Call api caller to create a new passenger object
 	errMsg := updateClass(c.ClassID, c)
@@ -259,12 +269,14 @@ func searchClassesMenu() {
 	fmt.Println("Please fill in the following details.")
 	fmt.Println("Module ID: ")
 	fmt.Scanln(&c.ModuleID)
+	fmt.Println("--------------------------")
 	errMsg, cc := searchClasses(c.ModuleID)
 
 	if errMsg != "Success" {
 		fmt.Println(errMsg)
 	} else {
 		printSlice(cc)
+
 	}
 	fmt.Println("--------------------------")
 }
