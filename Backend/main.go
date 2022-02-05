@@ -53,8 +53,36 @@ type Rating struct {
 	CreatorName       string
 	TargetName        string
 }
+type Student struct {
+	StudentID int
+	Sname     string
+	ClassID   int
+}
 
 //call other peoples api for TutorID TutorName rating classinfo
+//function for api calling from other packages
+func classStudents(cid int) (string, []Student) {
+	url := "http://10.31.11.12:9051/api/v1/allocations/class/" + strconv.Itoa(cid)
+	// Create request
+	response, err := http.Get(url)
+	var s []Student
+	var errMsg string
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+	} else {
+		// Fetch Request
+		data, _ := ioutil.ReadAll(response.Body)
+		// Get fail or success msg
+		if response.StatusCode == 422 {
+			errMsg = string(data)
+		} else {
+			errMsg = "Success"
+			json.Unmarshal([]byte(data), &s)
+		}
+	}
+	response.Body.Close()
+	return errMsg, s
+}
 
 //api caller for class rating from package 3.9
 func callClassInfo(modid string) (string, string) {
@@ -322,7 +350,7 @@ func searchClassDB(db *sql.DB, mid string) ([]Classes, string) {
 	var cc []Classes
 	for results.Next() {
 		var c Classes
-		err = results.Scan(&c.ClassID, &c.ModuleID, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorFName)
+		err = results.Scan(&c.ClassID, &c.ModuleID, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorFName, &c.TutorLName, &c.TutorID)
 		fmt.Println(c)
 		if err != nil {
 			errMsg = "Classes do not exist"
@@ -352,11 +380,6 @@ func searchClass(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-}
-
-//function for api calling from other packages
-func classStudents(w http.ResponseWriter, r *http.Request) {
-
 }
 
 // Help function that calls appropriate function in accordance to parameters in the query string
