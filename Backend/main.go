@@ -58,6 +58,13 @@ type Student struct {
 	Sname     string
 	ClassID   int
 }
+type Tutor struct {
+	Deleted     gorm.DeletedAt
+	TutorID     int    `json:"tutor_id" gorm:"primaryKey"`
+	Name        string `json:"name" validate:"required"`
+	Email       string `json:"email" validate:"required,email"`
+	Description string `json:"descriptions" validate:"required"`
+}
 
 //call other peoples api for TutorID TutorName rating classinfo
 //function for api calling from other packages
@@ -284,8 +291,38 @@ func deleteClass(w http.ResponseWriter, r *http.Request) {
 		errMsg := deleteClassDB(db, cid)
 		if errMsg == "Success" {
 			w.WriteHeader(http.StatusAccepted)
-			w.Write([]byte("202 - Course deleted: " +
-				params["courseid"]))
+			w.Write([]byte("202 - Class deleted: " +
+				params["classid"]))
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("404 - No class found"))
+		}
+
+	}
+
+}
+
+func deleteModDB(db *sql.DB, modid string) string {
+	query := fmt.Sprintf("DELETE FROM Classes WHERE ModuleID='%s'", modid)
+	_, err := db.Query(query)
+	errMsg := "Success"
+	if err != nil {
+		errMsg = "Class does not exist"
+	}
+	fmt.Println("Successfully deleted item from DB")
+	return errMsg
+}
+
+func deleteMod(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "DELETE" {
+		params := mux.Vars(r)
+		var modid string
+		fmt.Sscan(params["ModuleID"], &modid)
+		errMsg := deleteModDB(db, modid)
+		if errMsg == "Success" {
+			w.WriteHeader(http.StatusAccepted)
+			w.Write([]byte("202 - Classes related to Module Code deleted: " +
+				params["ModuleID"]))
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("404 - No class found"))
@@ -395,6 +432,21 @@ func GetClassQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+// Help function that calls appropriate function in accordance to parameters in the query string
+func DeleteClassQuery(w http.ResponseWriter, r *http.Request) {
+	// Get query string parameters
+	queryString := r.URL.Query()
+	_, deletemod := queryString["ModuleID"]
+	_, deleteclass := queryString["classid"]
+	if deleteclass {
+		deleteClass(w, r)
+		return
+	} else if deletemod {
+		deleteMod(w, r)
+		return
+	}
+}
 func main() {
 	var err error
 	db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/classes_db")
@@ -412,7 +464,7 @@ func main() {
 
 	router.HandleFunc("/api/v1/class", createClass).Methods("POST")
 	router.HandleFunc("/api/v1/class/{classid}", updateClass).Methods("PUT")
-	router.HandleFunc("/api/v1/class/{classid}", deleteClass).Methods("DELETE")
+	router.HandleFunc("/api/v1/class/", DeleteClassQuery).Methods("DELETE")
 	router.HandleFunc("/api/v1/class/{classid}", searchClass).Methods("GET")
 	router.HandleFunc("/api/v1/class", GetClassQuery).Methods("GET")
 	fmt.Println("driver microservice api operating on port 9101")

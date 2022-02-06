@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+
+  classmanagement:
+    depends_on: 
+      - classdatabase
+    build:
+      context: ./Backend
+    container_name: classmanagement
+    hostname: classmanagement
+    networks:
+      - class
+    ports:
+      - 9101:9101
+
+  classdatabase:
+    build:
+      context: ./ClassDB
+    container_name: classdatabase
+    hostname: classdatabase
+    networks:
+     - class
+    ports:
+      - 9101:9101
+    volumes:
+      - my_sql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=classes_db
+  
+
+volumes:
+  my_sql:
+
+networks:
+  class:
+    driver: bridge 
