@@ -75,8 +75,9 @@ Base URL for class: http://10.31.11.12:9101
 
 ## 4. Front End
 
-
-![This is an image]("C:\GO-Work\src\ETI_ASG2\Images\List of Students.png")
+<p style= 'align="center"'>
+  <img src="C:\GO-Work\src\ETI_ASG2\Images\List of Students.png" width="0.5wv">
+</p>
 
 ### functions for now
 <ul><li>delete class:
