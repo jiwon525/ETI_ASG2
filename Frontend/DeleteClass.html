@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        Delete Classes using Class ID
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="class.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <!--Navigation Header-->
+    <div class='row'>
+        <div class='col-sm-7 fontstyle' style='display:inline;'>
+            <h2 style='color:white; float:left; margin:0 10px 0 60px;'>Class Management</h2>
+        </div>
+        <div class='nav' style='display:inline-block; text-align:right;'>
+            <a href='./CreateNewClass.html'><button class='unselected'>Create New Class</button></a>
+            <a href='./DeleteClass.html'><button class='selectedButton'>Delete Class</button></a>
+            <a href='./UpdateClass.html'><button class='unselected'>Update Class</button></a>
+            <a href='./ViewClassList.html'><button class='unselected'>View List of Class</button></a>
+            <a href='./ViewStudentList.html'><button class='unselected'>View List of Students in Class</button></a>
+        </div>
+    </div>
+    <!--calling the jquery to pass in values-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <!--javascript to handle the API-->
+    <script type="text/javascript">
+        function deleteClass(method,type,form){
+            event.preventDefault();
+            const DataForm = new FormData(form);
+            const key = "2c78afaf-97da-4816-bbee-9ad239abb296";
+            var object;
+            var classid;
+            var url;
+            if (type == "DELETE"){
+                classid = parseInt(DataForm.get("classid"))
+                console.log(classid)
+                url="http://localhost:9101/api/v1/class/"+classid+"?key"+key
+                console.log(url)
+            };
+            $.ajax({
+                type:type,
+                url:url,
+                dataType:"json",
+                data:object,
+                contentType:"application/json",
+                success:function(data,textStatus,jqXHR){
+                    console.log(data)
+                    $("#message").html(table)
+                }
+            });
+        };
+    </script>
+
+    <!--container that stores form to delete-->
+    <div class="container" id="DELETE">
+        <h1>Delete Class</h1>
+        <form onsubmit="Class('deleteClassDB','DELETE',this);">
+            <div>
+                <label for="classid">Enter Class ID of the class you want to delete.</label>
+                <input type="text" class="form-control" name="classid" id="classid" placeholder="E.g. 1">
+            </div>
+            <br>
+            <br>
+            <button type="submit" class="submitbtn">Submit</button>
+        </form>
+    </div>
+    <div id="message"></div>
+</body>
+</html>

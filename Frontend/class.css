@@ -1,0 +1,46 @@
+body{
+    background-color:#E5E5E5;
+}
+
+.row{
+    background-color:#2A5660; 
+    padding:20px 20px 20px 20px;
+}
+.fontstyle{
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: normal;
+}
+
+h2 {
+    color:white; 
+    float:left;
+    margin:0 10px 0 60px;
+}
+.unselected{
+    background: transparent;
+    outline:none;
+    border:none;
+    color:white;
+    padding:0 5px 0 5px; 
+    margin-right: 60px;
+}
+.selectedButton{
+    background: #468F9F;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    outline:none;
+    border:none;
+    color:white;
+    padding:0 10px 0 10px; 
+    margin-right: 60px;
+}
+.submitbtn{
+    background-color: #468F9F;
+    color: white;
+    font-size:15px;
+    border:none;
+    border-radius: 2px ;
+    padding:.5em;
+    cursor:pointer;
+}

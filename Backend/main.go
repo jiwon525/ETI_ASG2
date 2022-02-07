@@ -19,17 +19,16 @@ import (
 //need to edit localhost to the front end ip address
 type Classes struct {
 	//first letter must be capitalised.
-	ClassID    int     `json:"classid"`  // gorm:"primaryKey"
-	ModuleID   string  `json:"moduleid"` //my module ID = module code from package 3.4
+	ClassID    int     `json:"classid"`    // gorm:"primaryKey"
+	ModuleCode string  `json:"modulecode"` //my module ID = module code from package 3.4
 	ClassDate  string  `json:"classdate"`
 	ClassStart string  `json:"classstart"`
 	ClassEnd   string  `json:"classend"`
 	ClassCap   int     `json:"classcap"`
-	TutorFName string  `json:"tutorfname"` //need to edit main.go
-	TutorLName string  `json:"tutorlname"` //need to edit main.go
-	TutorID    int     `json:"tutorid"`    //need to edit main.go
-	Rating     float64 `json:"rating"`     //need to edit main.go, get from 3.9
-	ClassInfo  string  `json:"classinfo"`  //get from 3.4
+	TutorName  string  `json:"tutorname"` //need to edit main.go //need to edit main.go
+	TutorID    int     `json:"tutorid"`   //need to edit main.go
+	Rating     float64 `json:"rating"`    //need to edit main.go, get from 3.9
+	ClassInfo  string  `json:"classinfo"` //get from 3.4
 }
 
 //to accept incoming data by calling api from package 3.4
@@ -55,7 +54,7 @@ type Rating struct {
 }
 type Student struct {
 	StudentID int
-	Sname     string
+	Semester  string
 	ClassID   int
 }
 type Tutor struct {
@@ -66,8 +65,13 @@ type Tutor struct {
 	Description string `json:"descriptions" validate:"required"`
 }
 
-//call other peoples api for TutorID TutorName rating classinfo
-//function for api calling from other packages
+/*
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}*/
+
+//----------function for api calling from other packages----------
+//calling timetable module to get a list of students
 func classStudents(cid int) (string, []Student) {
 	url := "http://10.31.11.12:9051/api/v1/allocations/class/" + strconv.Itoa(cid)
 	// Create request
@@ -84,7 +88,7 @@ func classStudents(cid int) (string, []Student) {
 			errMsg = string(data)
 		} else {
 			errMsg = "Success"
-			json.Unmarshal([]byte(data), &s)
+			json.Unmarshal([]byte(data), &s) //getting just the student id. need to get name from 3.5
 		}
 	}
 	response.Body.Close()
@@ -92,13 +96,12 @@ func classStudents(cid int) (string, []Student) {
 }
 
 //api caller for class rating from package 3.9
-func callClassInfo(modid string) (string, string) {
+func callClassInfo(modid string) string {
 	//set up url
 	url := "http://localhost:9141/api/v1/module/" + modid
 	// Create request
 	response, err := http.Get(url)
 	var mods Modules
-	var errMsg string
 	if err != nil {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 	} else {
@@ -106,14 +109,13 @@ func callClassInfo(modid string) (string, string) {
 		data, _ := ioutil.ReadAll(response.Body)
 		// Get fail or success msg
 		if response.StatusCode == 422 {
-			errMsg = string(data)
+			fmt.Println(string(data))
 		} else {
-			errMsg = "Success"
 			json.Unmarshal([]byte(data), &mods)
 		}
 	}
 	response.Body.Close()
-	return errMsg, mods.Synopis
+	return mods.Synopis
 }
 
 //api caller for module synopsis from package 3.4 Management of Modules
@@ -155,12 +157,11 @@ func ratingaverage(r []Rating) float64 {
 }
 
 var db *sql.DB
-var c Classes
 
 //for html
 
-const classURL = "http://localhost:9101/api/v1/class"
-const key = "2c78afaf-97da-4816-bbee-9ad239abb296"
+/*const classURL = "http://10.31.11.12:9101/api/v1/class"
+const key = "2c78afaf-97da-4816-bbee-9ad239abb296"*/
 
 //==================== Auxiliary Functions ====================
 func validKey(r *http.Request) bool {
@@ -181,7 +182,7 @@ func createClassDB(db *sql.DB, c Classes) {
 
 	//primary key class id is auto incremented.
 	//query to insert into db
-	query := fmt.Sprintf("INSERT INTO Classes (ModuleID,ClassDate,ClassStart,ClassEnd,ClassCap,TutorFName,TutorLName,TutorID,Rating,ClassInfo) VALUES('%s','%s','%s','%s',%d,'%s','%s',%d,%f,'%s')", c.ModuleID, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorFName, c.TutorLName, c.TutorID, c.Rating, c.ClassInfo)
+	query := fmt.Sprintf("INSERT INTO Classes (ModuleCode,ClassDate,ClassStart,ClassEnd,ClassCap,TutorName,TutorID,Rating,ClassInfo) VALUES('%s','%s','%s','%s',%d,'%s',%d,%f,'%s')", c.ModuleCode, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorName, c.TutorID, c.Rating, c.ClassInfo)
 	_, err := db.Query(query)
 
 	if err != nil {
@@ -208,7 +209,7 @@ func createClass(w http.ResponseWriter, r *http.Request) {
 			json.Unmarshal([]byte(reqBody), &c)
 
 			// Check if all non-null information exist
-			if c.ModuleID == "" || c.ClassDate == "" || c.ClassStart == "" || c.ClassEnd == "" || c.ClassCap == 0 || c.TutorFName == "" || c.TutorLName == "" || c.TutorID == 0 {
+			if c.ModuleCode == "" || c.ClassDate == "" || c.ClassStart == "" || c.ClassEnd == "" || c.ClassCap == 0 || c.TutorName == "" || c.TutorID == 0 {
 				w.WriteHeader(http.StatusUnprocessableEntity)
 				w.Write([]byte("422 - Please supply all neccessary information to create new class "))
 			} else {
@@ -227,7 +228,7 @@ func createClass(w http.ResponseWriter, r *http.Request) {
 
 //function to update class details in the db
 func updateClassDB(db *sql.DB, cid int, c Classes) {
-	query := fmt.Sprintf("UPDATE Classes SET ModuleID='%s',ClassDate='%s',ClassStart='%s',ClassEnd='%s',ClassCap=%d,TutorFName='%s',TutorLName='%s',TutorID=%d WHERE ClassID=%d", c.ModuleID, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorFName, c.TutorLName, c.TutorID, cid)
+	query := fmt.Sprintf("UPDATE Classes SET ModuleCode='%s',ClassDate='%s',ClassStart='%s',ClassEnd='%s',ClassCap=%d,TutorName='%s',TutorID=%d WHERE ClassID=%d", c.ModuleCode, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorName, c.TutorID, cid)
 	_, err := db.Query(query)
 	if err != nil {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
@@ -255,7 +256,7 @@ func updateClass(w http.ResponseWriter, r *http.Request) {
 			// Map json to variable Classes c
 			json.Unmarshal([]byte(reqBody), &c)
 			// Check if all non-null information exist
-			if c.ClassID == 0 || c.ModuleID == "" || c.ClassDate == "" || c.ClassStart == "" || c.ClassEnd == "" || c.ClassCap == 0 || c.TutorFName == "" || c.TutorLName == "" || c.TutorID == 0 {
+			if c.ClassID == 0 || c.ModuleCode == "" || c.ClassDate == "" || c.ClassStart == "" || c.ClassEnd == "" || c.ClassCap == 0 || c.TutorName == "" || c.TutorID == 0 {
 				w.WriteHeader(http.StatusUnprocessableEntity)
 				w.Write([]byte("422 - Please supply all neccessary information to update existing class "))
 			} else {
@@ -303,7 +304,7 @@ func deleteClass(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteModDB(db *sql.DB, modid string) string {
-	query := fmt.Sprintf("DELETE FROM Classes WHERE ModuleID='%s'", modid)
+	query := fmt.Sprintf("DELETE FROM Classes WHERE ModuleCode='%s'", modid)
 	_, err := db.Query(query)
 	errMsg := "Success"
 	if err != nil {
@@ -317,12 +318,12 @@ func deleteMod(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "DELETE" {
 		params := mux.Vars(r)
 		var modid string
-		fmt.Sscan(params["ModuleID"], &modid)
+		fmt.Sscan(params["ModuleCode"], &modid)
 		errMsg := deleteModDB(db, modid)
 		if errMsg == "Success" {
 			w.WriteHeader(http.StatusAccepted)
 			w.Write([]byte("202 - Classes related to Module Code deleted: " +
-				params["ModuleID"]))
+				params["ModuleCode"]))
 		} else {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("404 - No class found"))
@@ -334,8 +335,7 @@ func deleteMod(w http.ResponseWriter, r *http.Request) {
 
 //function to connect with database to print it out
 func getClassDB(db *sql.DB) ([]Classes, string) {
-	query := fmt.Sprintf("SELECT * FROM classes_db.classes")
-	results, err := db.Query(query)
+	results, err := db.Query("SELECT * FROM classes_db.classes")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -343,12 +343,11 @@ func getClassDB(db *sql.DB) ([]Classes, string) {
 	var cc []Classes
 	for results.Next() {
 		var c Classes
-		err = results.Scan(&c.ClassID, &c.ModuleID, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorFName, &c.TutorLName, &c.TutorID)
+		err = results.Scan(&c.ClassID, &c.ModuleCode, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorName, &c.TutorID)
 		if err != nil {
 			errMsg = "Classes do not exist"
 		}
-		errMsg2, cinfo := callClassInfo(c.ModuleID)
-		errMsg = errMsg2
+		cinfo := callClassInfo(c.ModuleCode)
 		errMsg3, r := callClassRating(c.ClassID)
 		errMsg = errMsg3
 		rating := ratingaverage(r)
@@ -378,7 +377,7 @@ func allClasses(w http.ResponseWriter, r *http.Request) {
 
 }
 func searchClassDB(db *sql.DB, mid string) ([]Classes, string) {
-	query := fmt.Sprintf("SELECT * FROM classes_db.classes WHERE ModuleID='%s'", mid)
+	query := fmt.Sprintf("SELECT * FROM classes_db.classes WHERE ModuleCode='%s'", mid)
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())
@@ -387,7 +386,7 @@ func searchClassDB(db *sql.DB, mid string) ([]Classes, string) {
 	var cc []Classes
 	for results.Next() {
 		var c Classes
-		err = results.Scan(&c.ClassID, &c.ModuleID, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorFName, &c.TutorLName, &c.TutorID)
+		err = results.Scan(&c.ClassID, &c.ModuleCode, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorName, &c.TutorID)
 		fmt.Println(c)
 		if err != nil {
 			errMsg = "Classes do not exist"
@@ -403,7 +402,7 @@ func searchClass(w http.ResponseWriter, r *http.Request) {
 		// Get query string parameters of student ID and semester start date
 		queryString := r.URL.Query()
 
-		fmt.Sscan(queryString["ModuleID"][0], &mid)
+		fmt.Sscan(queryString["ModuleCode"][0], &mid)
 
 		c, errMsg := searchClassDB(db, mid)
 
@@ -419,11 +418,32 @@ func searchClass(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getStudentList(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		var cid int
+		// Get query string parameters of student ID and semester start date
+		queryString := r.URL.Query()
+
+		fmt.Sscan(queryString["classid"][0], &cid)
+
+		errMsg, student := classStudents(cid)
+		switch errMsg {
+		case "Students do not exist":
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("404 - No class found"))
+		default:
+			//call api
+			json.NewEncoder(w).Encode(student)
+		}
+
+	}
+}
+
 // Help function that calls appropriate function in accordance to parameters in the query string
 func GetClassQuery(w http.ResponseWriter, r *http.Request) {
 	// Get query string parameters
 	queryString := r.URL.Query()
-	_, searchclass := queryString["ModuleID"]
+	_, searchclass := queryString["ModuleCode"]
 	if searchclass {
 		searchClass(w, r)
 		return
@@ -437,7 +457,7 @@ func GetClassQuery(w http.ResponseWriter, r *http.Request) {
 func DeleteClassQuery(w http.ResponseWriter, r *http.Request) {
 	// Get query string parameters
 	queryString := r.URL.Query()
-	_, deletemod := queryString["ModuleID"]
+	_, deletemod := queryString["ModuleCode"]
 	_, deleteclass := queryString["classid"]
 	if deleteclass {
 		deleteClass(w, r)
@@ -447,8 +467,10 @@ func DeleteClassQuery(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 func main() {
 	var err error
+	//db, err = sql.Open("mysql", "root:classdatabase@tcp(classdatabase:3306)/classes_db")
 	db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/classes_db")
 
 	// Handle error
@@ -465,7 +487,7 @@ func main() {
 	router.HandleFunc("/api/v1/class", createClass).Methods("POST")
 	router.HandleFunc("/api/v1/class/{classid}", updateClass).Methods("PUT")
 	router.HandleFunc("/api/v1/class/", DeleteClassQuery).Methods("DELETE")
-	router.HandleFunc("/api/v1/class/{classid}", searchClass).Methods("GET")
+	router.HandleFunc("/api/v1/class/{classid}", getStudentList).Methods("GET")
 	router.HandleFunc("/api/v1/class", GetClassQuery).Methods("GET")
 	fmt.Println("driver microservice api operating on port 9101")
 	log.Fatal(http.ListenAndServe(":9101", handlers.CORS(headers, origins, methods)(router)))

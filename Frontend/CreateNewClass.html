@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create New Class</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="createclasssheet.css">
+</head>
+
+<body>
+
+    <!--Navigation Header-->
+    <div class='row'>
+        <div class='col-sm-7 fontstyle' style='display:inline;'>
+            <h2>Class Management</h2>
+        </div>
+        <div class='nav' style='display:inline-block; text-align:right;'>
+            <a href='./CreateNewClass.html'><button class='selectedButton'>Create New Class</button></a>
+            <a href='./DeleteClass.html'><button class='unselected'>Delete Class</button></a>
+            <a href='./UpdateClass.html'><button class='unselected'>Update Class</button></a>
+            <a href='./ViewClassList.html'><button class='unselected'>View List of Class</button></a>
+            <a href='./ViewStudentList.html'><button class='unselected'>View List of Students in Class</button></a>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <!-- javascript to handle the API  -->
+    <script type="text/javascript">
+        function createClass(method, type, form) {
+            const key = "2c78afaf-97da-4816-bbee-9ad239abb296";
+            event.preventDefault();
+            const DataForm = new FormData(form);
+            var object;
+            var url;
+            if (type == "POST"){
+                var object = {
+                    "modulecode": DataForm.get("modulecode"),
+                    "classdate": DataForm.get("classdate"),
+                    "classstart": DataForm.get("classstart"),
+                    "classend": DataForm.get("classend"),
+                    "classcap": parseInt(DataForm.get("classcap")),
+                    "tutorname": DataForm.get("tutorname"),
+                    "tutorid": parseInt(DataForm.get("tutorid"))
+                };
+                object = JSON.stringify(object);
+                url = "http://localhost:9101/api/v1/class?key"+key
+                console.log(url)
+            }
+            $.ajax({
+                type: type,
+                url: url,
+                dataType: "json",
+                data: object,
+                contentType: "application/json",
+                error: function (jqXHR, textStatus, data) {
+                    $("#message").empty();
+                    if (type == "POST"){
+                        var table = $("<table><tr><th>"+jqXHR.responseText+"</th></tr>");
+                        $("#message").html(table);
+                    } else {
+                        alert("Result:" + textStatus + " " + error + " " + jqXHR.textStatus + " " + jqXHR.statusText + " " + jqXHR.responseText);
+                    }
+                    $("#message").show()
+                }
+            });
+        };
+    </script>
+    <div class="container" id="POST">
+        <h1>Create Class</h1>
+        <form onsubmit="createClass('createClassDB', 'POST', this);">
+            <div>
+                <label for="modulecode">Module Code:</label>
+                <input type="text" class="form-control" name="modulecode" id="modulecode" placeholder="E.g. DF, AIG...">
+            </div>
+            <br>
+            <div>
+                <label for="classdate">Day of the Week:</label>
+                <input type="text" class="form-control" name="classdate" id="classdate" placeholder="E.g. Monday">
+            </div>
+            <br>
+            <div>
+                <label for="classstart">Start time:</label>
+                <input type="text" class="form-control" name="classstart" id="classstart" placeholder="E.g. 0900">
+            </div>
+            <br>
+            <div>
+                <label for="classend">End time:</label>
+                <input type="text" class="form-control" name="classend" id="classend" placeholder="E.g. 1300">
+            </div>
+            <br>
+            <div>
+                <label for="classcap">Class capacity:</label>
+                <input type="text" class="form-control" name="classcap" id="classcap" placeholder="E.g. 30">
+            </div>
+            </br>
+            <div>
+                <label for="tutorname">Tutor Name:</label>
+                <input type="text" class="form-control" name="tutorname" id="tutorname" placeholder="E.g. James_lee">
+            </div>
+            </br>
+            <div>
+                <label for="tutorid">Tutor ID:</label>
+                <input type="text" class="form-control" name="tutorid" id="tutorid" placeholder="E.g. 1">
+            </div>
+            <br>
+            <br>
+        <button type="submit" class="submitbutton">Submit</button>
+            </form>
+    </div>
+</body>
+
+</html>

@@ -22,7 +22,7 @@ services:
     networks:
      - class
     ports:
-      - 9101:9101
+      - 9109:9109
     volumes:
       - my_sql:/var/lib/mysql
     environment:
