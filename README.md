@@ -46,9 +46,9 @@ Json Version:
 	classinfo: "DF"
 }
 ```
-MYSQL Table:<br></br>
-```
-create table Classes(ClassID int NOT NULL AUTO_INCREMENT, 
+MYSQL Table:</br>
+{create table Classes(
+	ClassID int NOT NULL AUTO_INCREMENT, 
 	ModuleID VARCHAR(5) NOT NULL,
 	ClassDate varchar(10),  
 	ClassStart  varchar(4), 
@@ -57,7 +57,19 @@ create table Classes(ClassID int NOT NULL AUTO_INCREMENT,
 	TutorFName VARCHAR(30),
     TutorID int,
     PRIMARY KEY (ClassID));
-```
+}
+## 3. Microservices 
+Base URL for class: http://10.31.11.12:9101
+
+| URL | Method  | Description  |
+| :--------: | :---: | :----------: |
+| /api/v1/class | POST | Create new class, all except class ID needs to be supplied |
+| /api/v1/class?classid={classid} | DELETE | Delete class by Class ID |
+| /api/v1/class?modulecode={modulecode} | DELETE | Delete all classes with certain Module Code |
+| /api/v1/class/{classid} | PUT | Update class by Class ID |
+| /api/v1/class/{classid} | GET | Get list of students in a class by its Class ID |
+| /api/v1/class | GET | Get all list of classes currently in the database |
+| /api/v1/class?ModuleCode={modulecode} | GET | Get list of classes teaching a certain module |
 
 ### functions for now
 <ul><li>delete class:
