@@ -19,25 +19,16 @@ Only tutors who have logged in would be able to create update delete classes, an
 Data in package 3.8 has been laid out in this way.</br> *Ratings and ClassInfo are not saved inside the database, they are called from other packages and are only used during my 'List all classes' function.*
 
 | Field Name | Type  | Description  |
-| :---:   | :---: | :---: |
+| :--------: | :---: | :----------: |
 | ClassID | int | The unique primary key that is auto incremented and used to identify classes |
-| :---:   | :---: | :---: |
 | ModuleCode | string | The acronym for classes which helps to identify which module this class teaches. |
-| :---:   | :---: | :---: |
 | ClassDate | string | The day of the week that the lessons occurs on. (E.g. Monday) |
-| :---:   | :---: | :---: |
 | ClassStart | string | Data written in 24-HR clock format to show when the class starts |
-| :---:   | :---: | :---: |
 | ClassEnd | string | Data written in 24-HR clock format to show when the class ends |
-| :---:   | :---: | :---: |
 | ClassCap | int | Total student capacity of the class |
-| :---:   | :---: | :---: |
 | TutorName | string | Tutor's name |
-| :---:   | :---: | :---: |
 | TutorID | int | Unique ID to identify the tutor |
-| :---:   | :---: | :---: |
 | Rating | float64 | The rating of the class |
-| :---:   | :---: | :---: |
 | ClassInfo | string | The module synopsis as extra info related to class |
 
 Json Version:
