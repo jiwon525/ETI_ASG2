@@ -47,6 +47,7 @@ Json Version:
 }
 ```
 MYSQL Table:<br></br>
+```
 create table Classes(ClassID int NOT NULL AUTO_INCREMENT, 
 	ModuleID VARCHAR(5) NOT NULL,
 	ClassDate varchar(10),  
@@ -56,7 +57,7 @@ create table Classes(ClassID int NOT NULL AUTO_INCREMENT,
 	TutorFName VARCHAR(30),
     TutorID int,
     PRIMARY KEY (ClassID));
-
+```
 
 ### functions for now
 <ul><li>delete class:
