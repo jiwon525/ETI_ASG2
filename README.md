@@ -19,7 +19,7 @@ Only tutors who have logged in would be able to create update delete classes, an
 Data in package 3.8 has been laid out in this way.</br> *Ratings and ClassInfo are not saved inside the database, they are called from other packages and are only used during my 'List all classes' function.*
 
 | Field Name | Type  | Description  |
-| :--------: | :---: | :-------------------------------------------------------------------------------: |
+| -------- | ----- | ------------------------------------------------------------------------------- |
 | ClassID | int | The unique primary key that is auto incremented and used to identify classes |
 | :--------: | :---: | :-------------------------------------------------------------------------------: |
 | ModuleCode | string | The acronym for classes which helps to identify which module this class teaches. |
