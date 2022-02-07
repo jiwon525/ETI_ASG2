@@ -19,8 +19,9 @@
             <a href='./CreateNewClass.html'><button class='selectedButton'>Create New Class</button></a>
             <a href='./DeleteClass.html'><button class='unselected'>Delete Class</button></a>
             <a href='./UpdateClass.html'><button class='unselected'>Update Class</button></a>
+            <a href='./SearchClass.html'><button class='unselected'>Search Class</button></a>
             <a href='./ViewClassList.html'><button class='unselected'>View List of Class</button></a>
-            <a href='./ViewStudentList.html'><button class='unselected'>View List of Students in Class</button></a>
+            <a href='./ViewStudentList.html'><button class='unselected'>View List of Students</button></a>
         </div>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -43,7 +44,7 @@
                     "tutorid": parseInt(DataForm.get("tutorid"))
                 };
                 object = JSON.stringify(object);
-                url = "http://localhost:9101/api/v1/class?key"+key
+                url = "http://10.31.11.12:9101/api/v1/class?key"+key
                 console.log(url)
             }
             $.ajax({
@@ -104,7 +105,7 @@
             </div>
             <br>
             <br>
-        <button type="submit" class="submitbutton">Submit</button>
+        <button type="submit" class="submitbtn">Submit</button>
             </form>
     </div>
 </body>

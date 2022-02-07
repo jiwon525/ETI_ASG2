@@ -16,22 +16,21 @@ import (
 	"gorm.io/gorm"
 )
 
-//need to edit localhost to the front end ip address
 type Classes struct {
 	//first letter must be capitalised.
-	ClassID    int     `json:"classid"`    // gorm:"primaryKey"
-	ModuleCode string  `json:"modulecode"` //my module ID = module code from package 3.4
+	ClassID    int     `json:"classid"`
+	ModuleCode string  `json:"modulecode"`
 	ClassDate  string  `json:"classdate"`
 	ClassStart string  `json:"classstart"`
 	ClassEnd   string  `json:"classend"`
 	ClassCap   int     `json:"classcap"`
-	TutorName  string  `json:"tutorname"` //need to edit main.go //need to edit main.go
-	TutorID    int     `json:"tutorid"`   //need to edit main.go
-	Rating     float64 `json:"rating"`    //need to edit main.go, get from 3.9
-	ClassInfo  string  `json:"classinfo"` //get from 3.4
+	TutorName  string  `json:"tutorname"`
+	TutorID    int     `json:"tutorid"`
+	Rating     float64 `json:"rating"`
+	ClassInfo  string  `json:"classinfo"`
 }
 
-//to accept incoming data by calling api from package 3.4
+//to accept incoming data from external api that i call--------------
 type Modules struct {
 	ModuleID          int    `gorm:"primaryKey"`
 	ModuleCode        string `json:"modulecode"`
@@ -65,10 +64,7 @@ type Tutor struct {
 	Description string `json:"descriptions" validate:"required"`
 }
 
-/*
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-}*/
+//-----------------------------------------------------------------------
 
 //----------function for api calling from other packages----------
 //calling timetable module to get a list of students
@@ -143,6 +139,7 @@ func callClassRating(cid int) (string, []Rating) {
 	return errMsg, r
 }
 
+//to collate an average score from the rating data collected
 func ratingaverage(r []Rating) float64 {
 	sum := 0
 	score := 0
@@ -156,11 +153,11 @@ func ratingaverage(r []Rating) float64 {
 
 }
 
+//-----------------------------------------------------------
 var db *sql.DB
 
-//for html
-
-/*const classURL = "http://10.31.11.12:9101/api/v1/class"
+/*for html
+const classURL = "http://10.31.11.12:9101/api/v1/class"
 const key = "2c78afaf-97da-4816-bbee-9ad239abb296"*/
 
 //==================== Auxiliary Functions ====================
@@ -177,7 +174,8 @@ func validKey(r *http.Request) bool {
 	}
 }
 
-//function to insert new classes in the db
+//=====================My REST APIs=======================
+//function to insert new classes into db (POST)
 func createClassDB(db *sql.DB, c Classes) {
 
 	//primary key class id is auto incremented.
@@ -391,6 +389,12 @@ func searchClassDB(db *sql.DB, mid string) ([]Classes, string) {
 		if err != nil {
 			errMsg = "Classes do not exist"
 		}
+		cinfo := callClassInfo(c.ModuleCode)
+		errMsg3, r := callClassRating(c.ClassID)
+		errMsg = errMsg3
+		rating := ratingaverage(r)
+		c.ClassInfo = cinfo
+		c.Rating = rating
 		cc = append(cc, c)
 		//fmt.Println(cc)
 	}
@@ -470,8 +474,7 @@ func DeleteClassQuery(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var err error
-	//db, err = sql.Open("mysql", "root:classdatabase@tcp(classdatabase:3306)/classes_db")
-	db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/classes_db")
+	db, err = sql.Open("mysql", "root:classdatabase@tcp(classdatabase:3306)/classes_db")
 
 	// Handle error
 	if err != nil {

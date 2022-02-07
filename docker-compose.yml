@@ -1,7 +1,17 @@
 version: '3.3'
 
 services:
-
+  classfrontend:
+    depends_on:
+      - classmanagement
+    build:
+      context: ./Frontend
+    container_name: classfrontend
+    ports:
+      - 9100:9100
+    environment:
+      - NGINX_PORT=9100
+    
   classmanagement:
     depends_on: 
       - classdatabase

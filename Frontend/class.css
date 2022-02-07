@@ -1,29 +1,10 @@
 body{
     background-color:#E5E5E5;
 }
-
-.row{
-    background-color:#2A5660; 
-    padding:20px 20px 20px 20px;
-}
-.fontstyle{
-    font-family: Roboto;
-    font-style: normal;
-    font-weight: normal;
-}
-
 h2 {
     color:white; 
     float:left;
     margin:0 10px 0 60px;
-}
-.unselected{
-    background: transparent;
-    outline:none;
-    border:none;
-    color:white;
-    padding:0 5px 0 5px; 
-    margin-right: 60px;
 }
 .selectedButton{
     background: #468F9F;
@@ -35,6 +16,61 @@ h2 {
     padding:0 10px 0 10px; 
     margin-right: 60px;
 }
+
+.row{
+    background-color:#2A5660; 
+    padding:20px 20px 20px 20px;
+}
+.fontstyle{
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: normal;
+}
+
+.unselected{
+    background: transparent;
+    outline:none;
+    border:none;
+    color:white;
+    padding:0 5px 0 5px; 
+    margin-right: 60px;
+}
+
+.primaryButton{
+    background: #468F9F;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    outline:none;
+    border:none;
+    color:white;
+    padding:0 10px 0 10px; 
+    margin:5px;
+}
+
+.hollowedButton{
+    background: transparent;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    border-width: 3px;
+    outline:none;
+    border-color: #468F9F;
+    color:black;
+    padding:0 10px 0 10px; 
+    margin:5px;
+}
+
+.greyButton{
+    background: transparent;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    border-width: 3px;
+    outline:none;
+    border-color: #6A6A6A;
+    color:#6A6A6A;
+    padding:0 10px 0 10px; 
+    margin:5px;
+}
+
 .submitbtn{
     background-color: #468F9F;
     color: white;
