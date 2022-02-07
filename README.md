@@ -75,8 +75,10 @@ Base URL for class: http://10.31.11.12:9101
 
 ## 4. Front End
 
+![create class](https://user-images.githubusercontent.com/60087854/152891452-74cc4bd1-b84e-40b5-b92a-9539a5dec4c0.png)
+![delete class](https://user-images.githubusercontent.com/60087854/152891470-a2b59d34-19cb-4390-b607-a2e5d44709b5.png)
+![List of Students](https://user-images.githubusercontent.com/60087854/152891438-d5eba434-c044-4e5b-92b4-3279e729dbaa.png)
 
-![image](Images\List of Students.png)
 
 ### functions for now
 <ul><li>delete class:
