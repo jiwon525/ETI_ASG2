@@ -71,6 +71,13 @@ Base URL for class: http://10.31.11.12:9101
 | /api/v1/class | GET | Get all list of classes currently in the database |
 | /api/v1/class?ModuleCode={modulecode} | GET | Get list of classes teaching a certain module |
 
+**All the above APIs will require the usage of an authentication key through a query string: ?key = "2c78afaf-97da-4816-bbee-9ad239abb298"**
+
+## 4. Front End
+
+
+![This is an image]("C:\GO-Work\src\ETI_ASG2\Images\List of Students.png")
+
 ### functions for now
 <ul><li>delete class:
 curl -X DELETE http://10.31.11.12:9101/api/v1/class/7?key=2c78afaf-97da-4816-bbee-9ad239abb296</li>
