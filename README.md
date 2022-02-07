@@ -1,9 +1,20 @@
-### Table of Contents
+# Table of Contents
 1. Introduction
 
 
 ### 1. Introduction
-<>
+Code for ETI Assignment 2. 
+Package I am working on : 3.8 Management of Classes
+'''Requirements:
+3.8.1.	Create, update, delete classes. Info includes
+3.8.1.1.	Class code
+3.8.1.2.	Schedule of the class
+3.8.1.3.	Capacity of class
+3.8.2.	View class info and ratings can do this  in listing classes??
+3.8.3.	List all classes
+3.8.4.	Search for classes
+3.8.5.	List all students in a class'''
+
 
 
 ### functions for now
