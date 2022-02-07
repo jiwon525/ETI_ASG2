@@ -21,11 +21,11 @@ Data in package 3.8 has been laid out in this way.</br> *Ratings and ClassInfo a
 | Field Name | Type  | Description  |
 | :--------: | :---: | :-------------------------------------------------------------------------------: |
 | ClassID | int | The unique primary key that is auto incremented and used to identify classes |
-| :---:   | :-: | :-: |
+| :--------: | :---: | :-------------------------------------------------------------------------------: |
 | ModuleCode | string | The acronym for classes which helps to identify which module this class teaches. |
-| :---:   | :-: | :-: |
+| :--------: | :---: | :-------------------------------------------------------------------------------: |
 | ClassDate | string | The day of the week that the lessons occurs on. (E.g. Monday) |
-| :---:   | :-: | :-: |
+| :--------: | :---: | :-------------------------------------------------------------------------------: |
 | ClassStart | string | Data written in 24-HR clock format to show when the class starts |
 | :---:   | :-: | :-: |
 | ClassEnd | string | Data written in 24-HR clock format to show when the class ends |
