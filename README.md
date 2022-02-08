@@ -89,9 +89,9 @@ Base URL for class: http://10.31.11.12:9101
 
 ## 5. Architecture Diagram
 ![diagram](https://user-images.githubusercontent.com/60087854/152892550-046c6331-1c45-4ac4-8b22-047ee2a2bec7.png)
-- [x] in data from Ratings to get the average rating value to print </br>
-- [x]Calling in data from Module to get the module synopsis with module code identifier </br>
-- [ ]Calling in Authentication to get Tutor ID for creation of class</br>
+- [x] Calling in data from Ratings to get the average rating value to print </br>
+- [x] Calling in data from Module to get the module synopsis with module code identifier </br>
+- [ ] Calling in Authentication to get Tutor ID for creation of class</br>
 Bid Service calles my apis to get list of classes </br>
 Timetable service calls my apis to get class details
 
