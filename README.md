@@ -79,6 +79,9 @@ Base URL for class: http://10.31.11.12:9101
 ![delete class](https://user-images.githubusercontent.com/60087854/152891470-a2b59d34-19cb-4390-b607-a2e5d44709b5.png)
 ![List of Students](https://user-images.githubusercontent.com/60087854/152891438-d5eba434-c044-4e5b-92b4-3279e729dbaa.png)
 
+## 5. Architecture Diagram
+![diagram](https://user-images.githubusercontent.com/60087854/152892550-046c6331-1c45-4ac4-8b22-047ee2a2bec7.png)
+
 
 ### functions for now
 <ul><li>delete class:
