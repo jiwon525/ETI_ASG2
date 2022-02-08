@@ -103,3 +103,8 @@ Timetable service calls my apis to get class details
 | /api/v1:9051/api/v1/allocations/class/{classid} | GET | Getting a list of students in a certain class |
 | "http://localhost:9141/api/v1/module/{modulecode} | GET | Get module synopsis |
 | http://10.31.11.12:9042/api/rating/class/{classid} | GET | Get all list of ratings for a certain class |
+
+## Docker
+- https://hub.docker.com/r/jwsch/classmanagement
+- https://hub.docker.com/r/jwsch/classdatabase
+- https://hub.docker.com/r/jwsch/classfrontend
