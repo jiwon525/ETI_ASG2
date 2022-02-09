@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <link rel="stylesheet" href="createclasssheet.css">
 </head>
 
@@ -16,7 +17,7 @@
             <h2>Class Management</h2>
         </div>
         <div class='nav' style='display:inline-block; text-align:right;'>
-            <a href='./CreateNewClass.html'><button class='selectedButton'>Create New Class</button></a>
+            <a href='./Index.html'><button class='selectedButton'>Create New Class</button></a>
             <a href='./DeleteClass.html'><button class='unselected'>Delete Class</button></a>
             <a href='./UpdateClass.html'><button class='unselected'>Update Class</button></a>
             <a href='./SearchClass.html'><button class='unselected'>Search Class</button></a>
@@ -24,7 +25,6 @@
             <a href='./ViewStudentList.html'><button class='unselected'>View List of Students</button></a>
         </div>
     </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <!-- javascript to handle the API  -->
     <script type="text/javascript">
         function createClass(method, type, form) {
@@ -33,6 +33,7 @@
             const DataForm = new FormData(form);
             var object;
             var url;
+            var errMsg
             if (type == "POST"){
                 var object = {
                     "modulecode": DataForm.get("modulecode"),
@@ -44,26 +45,36 @@
                     "tutorid": parseInt(DataForm.get("tutorid"))
                 };
                 object = JSON.stringify(object);
-                url = "http://10.31.11.12:9101/api/v1/class?key"+key
+                url = "http://localhost:9101/api/v1/class?key="+key
                 console.log(url)
+                /*http.Post(url,"application/json",bytes.NewBuffer(object))
+                var errMsg string
+                if err != nil {
+                    fmt.Printf("The HTTP request failed with error %s\n", err)
+                }*/
             }
             $.ajax({
-                type: type,
+                type: "POST",
                 url: url,
                 dataType: "json",
                 data: object,
                 contentType: "application/json",
-                error: function (jqXHR, textStatus, data) {
-                    $("#message").empty();
-                    if (type == "POST"){
-                        var table = $("<table><tr><th>"+jqXHR.responseText+"</th></tr>");
-                        $("#message").html(table);
-                    } else {
-                        alert("Result:" + textStatus + " " + error + " " + jqXHR.textStatus + " " + jqXHR.statusText + " " + jqXHR.responseText);
-                    }
-                    $("#message").show()
+                statusCode: {
+                    401: function(response) {
+                        errMsg = response.responseText
+                    },
+                    402: function(response) {
+                        errMsg = response.responseText
+                    },
+                    422: function(response) {
+                        errMsg = response.responseText
+                    },
+                    201: function(response) {  
+                        errMsg = response.responseText
+                    },
                 }
             });
+            return errMsg
         };
     </script>
     <div class="container" id="POST">
@@ -105,8 +116,8 @@
             </div>
             <br>
             <br>
-        <button type="submit" class="submitbtn">Submit</button>
-            </form>
+            <button type="submit" class="submitbtn">Submit</button>
+        </form>
     </div>
 </body>
 

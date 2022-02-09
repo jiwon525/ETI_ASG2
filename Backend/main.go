@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -69,7 +68,7 @@ type Tutor struct {
 //----------function for api calling from other packages----------
 //calling timetable module to get a list of students
 func classStudents(cid int) (string, []Student) {
-	url := "http://10.31.11.12:9051/api/v1/allocations/class/" + strconv.Itoa(cid)
+	/*url := "http://10.31.11.12:9051/api/v1/allocations/class/" + strconv.Itoa(cid)
 	// Create request
 	response, err := http.Get(url)
 	var s []Student
@@ -88,13 +87,24 @@ func classStudents(cid int) (string, []Student) {
 		}
 	}
 	response.Body.Close()
+	return errMsg, s*/
+	errMsg := "Success"
+	var s []Student
+	var s2 Student
+	id := 1
+	sem := "19"
+	ccid := 1
+	s2.StudentID = id
+	s2.Semester = sem
+	s2.ClassID = ccid
+	s = append(s, s2)
 	return errMsg, s
 }
 
-//api caller for class rating from package 3.9
+//api caller for module synopsis from package 3.4 Management of Modules
 func callClassInfo(modid string) string {
 	//set up url
-	url := "http://localhost:9141/api/v1/module/" + modid
+	/*url := "http://localhost:9141/api/v1/module/" + modid
 	// Create request
 	response, err := http.Get(url)
 	var mods Modules
@@ -111,13 +121,16 @@ func callClassInfo(modid string) string {
 		}
 	}
 	response.Body.Close()
-	return mods.Synopis
+	return mods.Synopis*/
+
+	synop := "Digital forensics"
+	return synop
 }
 
-//api caller for module synopsis from package 3.4 Management of Modules
+//api caller for class rating from package 3.9
 func callClassRating(cid int) (string, []Rating) {
 	//set up url
-	url := "http://10.31.11.12:9042/api/rating/class/" + strconv.Itoa(cid)
+	/*url := "http://10.31.11.12:9042/api/rating/class/" + strconv.Itoa(cid)
 	// Create request
 	response, err := http.Get(url)
 	var r []Rating
@@ -136,7 +149,32 @@ func callClassRating(cid int) (string, []Rating) {
 		}
 	}
 	response.Body.Close()
-	return errMsg, r
+	return errMsg, r*/
+	errMsg := "Success"
+	var r Rating
+	var rl []Rating
+	it := 1
+	r.RatingID = it
+	id := 1
+	r.CreatorID = id
+	ct := "student"
+	r.CreatorType = ct
+	targetid := 1
+	r.TargetID = targetid
+	tt := "class"
+	r.TargetType = tt
+	rs := 4
+	r.RatingScore = rs
+	a := 0
+	r.Anonymous = a
+	dt := "datetime"
+	r.DateTimePublished = dt
+	cn := "tester"
+	r.CreatorName = cn
+	tn := "target"
+	r.TargetName = tn
+	rl = append(rl, r)
+	return errMsg, rl
 }
 
 //to collate an average score from the rating data collected
@@ -157,8 +195,7 @@ func ratingaverage(r []Rating) float64 {
 var db *sql.DB
 
 /*for html
-const classURL = "http://10.31.11.12:9101/api/v1/class"
-const key = "2c78afaf-97da-4816-bbee-9ad239abb296"*/
+const classURL = "http://10.31.11.12:9101/api/v1/class"*/
 
 //==================== Auxiliary Functions ====================
 func validKey(r *http.Request) bool {
@@ -177,10 +214,9 @@ func validKey(r *http.Request) bool {
 //=====================My REST APIs=======================
 //function to insert new classes into db (POST)
 func createClassDB(db *sql.DB, c Classes) {
-
 	//primary key class id is auto incremented.
 	//query to insert into db
-	query := fmt.Sprintf("INSERT INTO Classes (ModuleCode,ClassDate,ClassStart,ClassEnd,ClassCap,TutorName,TutorID,Rating,ClassInfo) VALUES('%s','%s','%s','%s',%d,'%s',%d,%f,'%s')", c.ModuleCode, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorName, c.TutorID, c.Rating, c.ClassInfo)
+	query := fmt.Sprintf("INSERT INTO Classes(ModuleCode,ClassDate,ClassStart,ClassEnd,ClassCap,TutorName,TutorID) VALUES('%s','%s','%s','%s',%d,'%s',%d)", c.ModuleCode, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorName, c.TutorID)
 	_, err := db.Query(query)
 
 	if err != nil {
@@ -205,7 +241,7 @@ func createClass(w http.ResponseWriter, r *http.Request) {
 			var c Classes
 			// Map json to variable Classes c
 			json.Unmarshal([]byte(reqBody), &c)
-
+			fmt.Println(c)
 			// Check if all non-null information exist
 			if c.ModuleCode == "" || c.ClassDate == "" || c.ClassStart == "" || c.ClassEnd == "" || c.ClassCap == 0 || c.TutorName == "" || c.TutorID == 0 {
 				w.WriteHeader(http.StatusUnprocessableEntity)
@@ -283,10 +319,12 @@ func deleteClassDB(db *sql.DB, cid int) string {
 
 //api to delete classes
 func deleteClass(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("deleting class based on class id now")
 	if r.Method == "DELETE" {
 		params := mux.Vars(r)
 		var cid int
-		fmt.Sscan(params["classid"], &cid)
+		querystring := r.URL.Query()
+		fmt.Sscan(querystring["classid"][0], &cid)
 		errMsg := deleteClassDB(db, cid)
 		if errMsg == "Success" {
 			w.WriteHeader(http.StatusAccepted)
@@ -385,7 +423,6 @@ func searchClassDB(db *sql.DB, mid string) ([]Classes, string) {
 	for results.Next() {
 		var c Classes
 		err = results.Scan(&c.ClassID, &c.ModuleCode, &c.ClassDate, &c.ClassStart, &c.ClassEnd, &c.ClassCap, &c.TutorName, &c.TutorID)
-		fmt.Println(c)
 		if err != nil {
 			errMsg = "Classes do not exist"
 		}
@@ -396,7 +433,6 @@ func searchClassDB(db *sql.DB, mid string) ([]Classes, string) {
 		c.ClassInfo = cinfo
 		c.Rating = rating
 		cc = append(cc, c)
-		//fmt.Println(cc)
 	}
 	return cc, errMsg
 }
@@ -459,6 +495,7 @@ func GetClassQuery(w http.ResponseWriter, r *http.Request) {
 
 // Help function that calls appropriate function in accordance to parameters in the query string
 func DeleteClassQuery(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("delete query")
 	// Get query string parameters
 	queryString := r.URL.Query()
 	_, deletemod := queryString["ModuleCode"]
@@ -474,8 +511,8 @@ func DeleteClassQuery(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var err error
-	db, err = sql.Open("mysql", "root:classdatabase@tcp(classdatabase:3306)/classes_db")
-
+	db, err = sql.Open("mysql", "root:class_database@tcp(classdatabase:3306)/classes_db")
+	//db, err = sql.Open("mysql", "user:password@tcp(127.0.0.1:3306)/classes_db")
 	// Handle error
 	if err != nil {
 		panic(err.Error())
@@ -483,17 +520,18 @@ func main() {
 
 	router := mux.NewRouter()
 	// This is to allow the headers, origins and methods all to access CORS resource sharing
-	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	headers := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
 	origins := handlers.AllowedOrigins([]string{"*"})
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 
 	router.HandleFunc("/api/v1/class", createClass).Methods("POST")
 	router.HandleFunc("/api/v1/class/{classid}", updateClass).Methods("PUT")
-	router.HandleFunc("/api/v1/class/", DeleteClassQuery).Methods("DELETE")
+	router.HandleFunc("/api/v1/class", DeleteClassQuery).Methods("DELETE")
 	router.HandleFunc("/api/v1/class/{classid}", getStudentList).Methods("GET")
 	router.HandleFunc("/api/v1/class", GetClassQuery).Methods("GET")
 	fmt.Println("driver microservice api operating on port 9101")
-	log.Fatal(http.ListenAndServe(":9101", handlers.CORS(headers, origins, methods)(router)))
+	//log.Fatal(http.ListenAndServe(":9101", router))
+	log.Fatal(http.ListenAndServe(":9101", handlers.CORS(origins, headers, methods)(router)))
 	httpPort := os.Getenv("HTTP_PORT")
 	if httpPort == "" {
 		httpPort = "9101"

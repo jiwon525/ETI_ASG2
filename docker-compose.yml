@@ -8,9 +8,9 @@ services:
       context: ./Frontend
     container_name: classfrontend
     ports:
-      - 9100:9100
+      - 9100:80
     environment:
-      - NGINX_PORT=9100
+      - NGINX_PORT=80
     
   classmanagement:
     depends_on: 
@@ -37,7 +37,7 @@ services:
       - my_sql:/var/lib/mysql
     environment:
       - MYSQL_ROOT_USER=root
-      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=class_database
       - MYSQL_DATABASE=classes_db
   
 

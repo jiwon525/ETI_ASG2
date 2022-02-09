@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <link rel="stylesheet" href="class.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -18,7 +19,7 @@
             <h2>Class Management</h2>
         </div>
         <div class='nav' style='display:inline-block; text-align:right;'>
-            <a href='./CreateNewClass.html'><button class='unselected'>Create New Class</button></a>
+            <a href='./Index.html'><button class='unselected'>Create New Class</button></a>
             <a href='./DeleteClass.html'><button class='unselected'>Delete Class</button></a>
             <a href='./UpdateClass.html'><button class='unselected'>Update Class</button></a>
             <a href='./SearchClass.html'><button class='unselected'>Search Class</button></a>
@@ -26,7 +27,6 @@
             <a href='./ViewStudentList.html'><button class='unselected'>View List of Students</button></a>
         </div>
     </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <!-- javascript to handle the API  -->
     <script type="text/javascript">
         function ClassList(method, type, form) {
@@ -36,7 +36,8 @@
             var object;
             var url;
             if (type == "GET") {
-                url = "http://10.31.11.12:9101/api/v1/class"+"?key"+key
+                //10.31.11.12
+                url = "http://localhost:9101/api/v1/class"+"?key="+key
                 console.log(url)
             }
             $.ajax({
