@@ -1,5 +1,10 @@
 # Table of Contents
 1. Introduction
+2. Data Structures
+3. Microservices
+4. Front End
+5. Architecture Diagram
+6. API Observed
 
 
 ## 1. Introduction
@@ -77,18 +82,29 @@ Base URL for class: http://10.31.11.12:9101
 
 ![create class](https://user-images.githubusercontent.com/60087854/152891452-74cc4bd1-b84e-40b5-b92a-9539a5dec4c0.png)
 ![delete class](https://user-images.githubusercontent.com/60087854/152891470-a2b59d34-19cb-4390-b607-a2e5d44709b5.png)
+![update class](https://user-images.githubusercontent.com/60087854/152895345-85f3f6d4-6c93-4e0c-b41c-3be60b1065ee.png)
+![searching classes](https://user-images.githubusercontent.com/60087854/152895371-39effcf3-239d-4e35-9707-2218f9274706.png)
+![list of classes](https://user-images.githubusercontent.com/60087854/152895397-b6bc1ba0-31d6-4106-8570-3f4d3e1176ea.png)
 ![List of Students](https://user-images.githubusercontent.com/60087854/152891438-d5eba434-c044-4e5b-92b4-3279e729dbaa.png)
 
 ## 5. Architecture Diagram
 ![diagram](https://user-images.githubusercontent.com/60087854/152892550-046c6331-1c45-4ac4-8b22-047ee2a2bec7.png)
+- [x] Calling in data from Ratings to get the average rating value to print </br>
+- [x] Calling in data from Module to get the module synopsis with module code identifier </br>
+- [ ] Calling in Authentication to get Tutor ID for creation of class</br>
+--------------------------------------------------------------------------
+Bid Service calles my apis to get list of classes </br>
+Timetable service calls my apis to get class details
 
+## 6. API Observed
 
-### functions for now
-<ul><li>delete class:
-curl -X DELETE http://10.31.11.12:9101/api/v1/class/7?key=2c78afaf-97da-4816-bbee-9ad239abb296</li>
-<li>create class:
-curl -X POST -H "Content-Type:application/json" -d "{"moduleid":"DF","classdate":"Monday","classstart":"11:00:00","classend":"13:00:00","classcap":30,"tutorname":"James_Lee"}" "http://localhost:9101/api/v1/class?key=2c78afaf-97da-4816-bbee-9ad239abb296"</li>
-<li>update class(with class ID=1):
-curl -H "Content-Type:application/json" -X PUT http://localhost:9101/api/v1/class/1?key=2c78afaf-97da-4816-bbee-9ad239abb296 -d "{"moduleid":"DF","classdate":"Monday","classstart":"11:00:00","classend":"13:00:00","classcap":30,"tutorname":"James_Lee"}"</li>
-</ul>
+| URL | Method  | Description  |
+| :--------: | :---: | :----------: |
+| /api/v1:9051/api/v1/allocations/class/{classid} | GET | Getting a list of students in a certain class |
+| "http://localhost:9141/api/v1/module/{modulecode} | GET | Get module synopsis |
+| http://10.31.11.12:9042/api/rating/class/{classid} | GET | Get all list of ratings for a certain class |
 
+## Docker
+- https://hub.docker.com/r/jwsch/classmanagement
+- https://hub.docker.com/r/jwsch/classdatabase
+- https://hub.docker.com/r/jwsch/classfrontend
