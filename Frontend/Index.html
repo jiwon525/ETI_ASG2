@@ -45,6 +45,7 @@
                     "tutorid": parseInt(DataForm.get("tutorid"))
                 };
                 object = JSON.stringify(object);
+                print(object)
                 url = "http://localhost:9101/api/v1/class?key="+key
                 console.log(url)
                 /*http.Post(url,"application/json",bytes.NewBuffer(object))

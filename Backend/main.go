@@ -123,7 +123,7 @@ func callClassInfo(modid string) string {
 	response.Body.Close()
 	return mods.Synopis*/
 
-	synop := "Digital forensics"
+	synop := "Module Synopsis"
 	return synop
 }
 
@@ -174,6 +174,28 @@ func callClassRating(cid int) (string, []Rating) {
 	tn := "target"
 	r.TargetName = tn
 	rl = append(rl, r)
+	var r2 Rating
+	it2 := 2
+	r2.RatingID = it2
+	id2 := 2
+	r2.CreatorID = id2
+	ct2 := "student"
+	r2.CreatorType = ct2
+	targetid2 := 12
+	r2.TargetID = targetid2
+	tt2 := "class"
+	r2.TargetType = tt2
+	rs2 := 5
+	r2.RatingScore = rs2
+	a2 := 0
+	r2.Anonymous = a2
+	dt2 := "datetime"
+	r2.DateTimePublished = dt2
+	cn2 := "tester"
+	r2.CreatorName = cn2
+	tn2 := "target"
+	r2.TargetName = tn2
+	rl = append(rl, r2)
 	return errMsg, rl
 }
 
@@ -218,7 +240,6 @@ func createClassDB(db *sql.DB, c Classes) {
 	//query to insert into db
 	query := fmt.Sprintf("INSERT INTO Classes(ModuleCode,ClassDate,ClassStart,ClassEnd,ClassCap,TutorName,TutorID) VALUES('%s','%s','%s','%s',%d,'%s',%d)", c.ModuleCode, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorName, c.TutorID)
 	_, err := db.Query(query)
-
 	if err != nil {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 		panic(err.Error())
@@ -242,6 +263,7 @@ func createClass(w http.ResponseWriter, r *http.Request) {
 			// Map json to variable Classes c
 			json.Unmarshal([]byte(reqBody), &c)
 			fmt.Println(c)
+			fmt.Println(c.ModuleCode, c.ClassDate, c.ClassStart, c.ClassEnd, c.ClassCap, c.TutorName, c.TutorID)
 			// Check if all non-null information exist
 			if c.ModuleCode == "" || c.ClassDate == "" || c.ClassStart == "" || c.ClassEnd == "" || c.ClassCap == 0 || c.TutorName == "" || c.TutorID == 0 {
 				w.WriteHeader(http.StatusUnprocessableEntity)
@@ -371,7 +393,7 @@ func deleteMod(w http.ResponseWriter, r *http.Request) {
 
 //function to connect with database to print it out
 func getClassDB(db *sql.DB) ([]Classes, string) {
-	results, err := db.Query("SELECT * FROM classes_db.classes")
+	results, err := db.Query("SELECT * FROM classes_db.Classes")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -413,7 +435,7 @@ func allClasses(w http.ResponseWriter, r *http.Request) {
 
 }
 func searchClassDB(db *sql.DB, mid string) ([]Classes, string) {
-	query := fmt.Sprintf("SELECT * FROM classes_db.classes WHERE ModuleCode='%s'", mid)
+	query := fmt.Sprintf("SELECT * FROM classes_db.Classes WHERE ModuleCode='%s'", mid)
 	results, err := db.Query(query)
 	if err != nil {
 		panic(err.Error())

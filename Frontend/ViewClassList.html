@@ -9,7 +9,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <link rel="stylesheet" href="class.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 </head>
 
 <body>
@@ -33,11 +32,12 @@
             event.preventDefault();
             const DataForm = new FormData(form);
             const key = "2c78afaf-97da-4816-bbee-9ad239abb296";
+            const classURL = "http://localhost:9101/api/v1/class"
             var object;
             var url;
             if (type == "GET") {
                 //10.31.11.12
-                url = "http://localhost:9101/api/v1/class"+"?key="+key
+                url = classURL +"?key="+key
                 console.log(url)
             }
             $.ajax({
